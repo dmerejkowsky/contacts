@@ -2,19 +2,23 @@ package info.dmerej.contacts;
 
 import java.io.File;
 import java.sql.*;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 public class Database {
-    private Connection connection;
-    private int insertedCount = 0;
+    private final Connection connection;
+    private final int insertedCount = 0;
 
     public Database(File databaseFile) {
         String databasePath = databaseFile.getPath();
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
         } catch (SQLException e) {
-            throw new RuntimeException("Could not create connection: " + e.toString());
+            throw new RuntimeException("Could not create connection: " + e);
         }
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 
     public void migrate() {
@@ -22,36 +26,34 @@ public class Database {
         try {
             Statement statement = connection.createStatement();
             statement.execute("""
-                    CREATE TABLE contacts(
-                    id INTEGER PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    email TEXT NOT NULL
-                    )
-                    """
+                CREATE TABLE contacts(
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL
+                )
+                """
             );
         } catch (SQLException e) {
-            throw new RuntimeException("Could not migrate db: " + e.toString());
+            throw new RuntimeException("Could not migrate db: " + e);
         }
         System.out.println("Done migrating database");
     }
 
-    public void insertContacts(Stream<Contact> contacts) {
-        // TODO
-    }
 
-    public String getContactNameFromEmail(String email) {
-        String query = "SELECT name FROM contacts WHERE email = ?";
+    public Optional<Contact> findContactByEmail(String email) {
+        String query = "SELECT name, email FROM contacts WHERE email = ?";
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, email);
             ResultSet result = statement.executeQuery();
             if (result.next()) {
-                return result.getString(1);
+                var name = result.getString(1);
+                return Optional.of(new Contact(name, email));
             } else {
-                throw new RuntimeException("No match in the db for email: " + email);
+                return Optional.empty();
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error when looking up contacts from db: " + e.toString());
+            throw new RuntimeException("Error when looking up contacts from db: " + e);
         }
     }
 
@@ -63,7 +65,7 @@ public class Database {
         try {
             connection.close();
         } catch (SQLException e) {
-            throw new RuntimeException("Could not close db: " + e.toString());
+            throw new RuntimeException("Could not close db: " + e);
         }
     }
 

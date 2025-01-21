@@ -2,12 +2,11 @@ package info.dmerej.contacts;
 
 
 import java.io.File;
-import java.util.stream.Stream;
 
 public class App {
 
-    private Database database;
-    private ContactsGenerator contactsGenerator;
+    private final Database database;
+    private final ContactsGenerator contactsGenerator;
 
     public App() {
         File file = new File("contacts.sqlite3");
@@ -17,7 +16,7 @@ public class App {
         } else {
             database = new Database(file);
         }
-        contactsGenerator = new ContactsGenerator();
+        contactsGenerator = new ContactsGenerator(database.getConnection());
     }
 
     public static void main(String[] args) {
@@ -30,7 +29,7 @@ public class App {
         App app = null;
         try {
             app = new App();
-            app.insertContacts(count);
+            app.contactsGenerator.insertManyContacts(count);
             app.lookupContact(count);
         } finally {
             if (app != null) {
@@ -39,18 +38,16 @@ public class App {
         }
     }
 
-    private void insertContacts(int count) {
-        Stream<Contact> contacts = contactsGenerator.generateContacts(count);
-        database.insertContacts(contacts);
-    }
-
     private void lookupContact(int count) {
         String email = String.format("email-%d@tld", count);
         long start = System.currentTimeMillis();
-        database.getContactNameFromEmail(email);
+        var contact = database.findContactByEmail(email);
         long end = System.currentTimeMillis();
         long elapsed = end - start;
-        System.out.format("Query took %f seconds\n", elapsed / 1000.0);
+        System.out.format("Query took %d ms\n", elapsed);
+        if (contact.isEmpty()) {
+            throw new RuntimeException("Contact not found");
+        }
     }
 
     public void close() {

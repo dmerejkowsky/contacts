@@ -1,17 +1,20 @@
 package info.dmerej.contacts;
 
-import java.util.Arrays;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+import java.sql.Connection;
 
 public class ContactsGenerator {
-  public Stream<Contact> generateContacts(int count) {
-    // TODO: generate a *lot* of contacts instead of just 3
-    Contact[] contacts = new Contact[]{
-      new Contact("name-1", "email-1@domain.tld"),
-      new Contact("name-2", "email-2@domain.tld"),
-      new Contact("name-3", "email-3@domain.tld"),
-    };
-    return Arrays.stream(contacts);
-  }
+    private final Connection connection;
+
+    public ContactsGenerator(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void insertManyContacts(int numContacts) {
+        System.out.format("Inserting %d contacts ...", numContacts);
+        // TODO
+        // At the end of this call, the db should contain exactly `numContacts` contacts,
+        // from email-1@domain.tld to email-{numContacts}@domain.tld
+        System.out.println("done");
+    }
+
 }
