@@ -33,9 +33,6 @@ class Contacts:
             """,
             (email,),
         )
-        import time
-
-        time.sleep(2)
         return cursor.fetchone()
 
 
