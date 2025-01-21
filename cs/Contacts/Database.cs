@@ -19,6 +19,8 @@ public class Database : IDisposable
     GC.SuppressFinalize(this);
   }
 
+  public SqliteConnection Connection() { return _connection; }
+
 
   public Contact? LookupContact(string email)
   {

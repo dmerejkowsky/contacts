@@ -1,13 +1,9 @@
-﻿namespace Contacts;
+﻿using Microsoft.Data.Sqlite;
+
+namespace Contacts;
 
 public class Program
 {
-  private readonly ContactsGenerator _generator;
-
-  public Program()
-  {
-    _generator = new ContactsGenerator();
-  }
 
   static int Main(string[] args)
   {
@@ -26,12 +22,12 @@ public class Program
       return 1;
     }
 
-    var app = new Program();
-    app.Run(count);
+    Run(count);
+    
     return 0;
   }
 
-  private Database GetMigratedDatabase()
+  private static Database GetMigratedDatabase()
   {
     string dbPath = "contacts.sqlite3";
     if (!File.Exists(dbPath))
@@ -46,20 +42,20 @@ public class Program
     }
   }
 
-  private void Run(int count)
+  private static void Run(int count)
   {
     var database = GetMigratedDatabase();
 
     using (database)
     {
-      InsertContacts(database, count);
+      InsertContacts(database.Connection(), count);
       LookupContact(database, count);
     }
   }
 
 
 
-  private void InsertContacts(Database database, int count)
+  private static void InsertContacts(SqliteConnection connection, int count)
   {
     Console.WriteLine($"Inserting {count} contacts ...");
     // TODO
@@ -68,7 +64,7 @@ public class Program
     Console.WriteLine("Done");
   }
 
-  private void LookupContact(Database database, int count)
+  private static void LookupContact(Database database, int count)
   {
     // Note: make sure this is the *last* inserted contact
     string email = $"contact-{count}@domain.tld";
