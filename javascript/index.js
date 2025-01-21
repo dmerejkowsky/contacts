@@ -8,18 +8,6 @@ const numContacts = parseInt(process.argv[2], 10);
 
 const shouldMigrate = !fs.existsSync(filename)
 
-/**
- * Generate `numContacts` contacts,
- * one at a time
- *
- */
-function * generateContacts () {
- // TODO
-  yield [`name-1`, `email-1@domain.tld`]
-  yield [`name-2`, `email-2@domain.tld`]
-  yield [`name-3`, `email-3@domain.tld`]
-}
-
 const migrate = async (db) => {
   console.log('Migrating db ...')
   await db.exec(`
@@ -32,22 +20,18 @@ const migrate = async (db) => {
   console.log('Done migrating db')
 }
 
-const insertContacts = async (db) => {
-  console.log('Inserting contacts ...')
+const insertManyContacts = async (db, numContacts) => {
+  console.log(`Inserting ${numContacts} contacts ...`)
   // TODO
+  // At the end of this call, the db should contain exactly `numContacts` contacts,
+  // from email-1@domain.tld to email-{numContacts}@domain.tld
+  console.log('Done inserting contacts')
 }
 
 const queryContact = async (db) => {
-  const start = Date.now()
-  const res = await db.get('SELECT name FROM contacts WHERE email = ?', [`email-${numContacts}@domain.tld`])
-  if (!res || !res.name) {
-    console.error('Contact not found')
-    process.exit(1)
-  }
-  const end = Date.now()
-  const elapsed = (end - start) / 1000
-  console.log(`Query took ${elapsed} seconds`)
+  return await db.get('SELECT name FROM contacts WHERE email = ?', [`email-${numContacts}@domain.tld`])
 }
+
 
 (async () => {
   const db = await open({
@@ -57,7 +41,18 @@ const queryContact = async (db) => {
   if (shouldMigrate) {
     await migrate(db)
   }
-  await insertContacts(db)
-  await queryContact(db)
+  await insertManyContacts(db, numContacts)
+
+  const start = Date.now()
+  const contact = await queryContact(db)
+  const end = Date.now()
+  const elapsed = end - start
+  console.log(`Query took ${elapsed} milliseconds`)
+  
+  if (!contact || !contact.name) {
+    console.error('Contact not found')
+    process.exit(1)
+  }
+
   await db.close()
 })()
