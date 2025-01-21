@@ -61,8 +61,11 @@ public class Program
 
   private void InsertContacts(Database database, int count)
   {
-    var contacts = _generator.GenerateContacts(count);
-    database.InsertContacts(contacts);
+    Console.WriteLine($"Inserting {count} contacts ...");
+    // TODO
+    // At the end of this call, the db should contain exactly `numContacts` contacts,
+    // from email-1@domain.tld to email-{numContacts}@domain.tld
+    Console.WriteLine("Done");
   }
 
   private void LookupContact(Database database, int count)
@@ -71,11 +74,14 @@ public class Program
     string email = $"contact-{count}@domain.tld";
 
     var before = DateTime.Now.TimeOfDay;
-    string name = database.LookupContact(email);
+    var contact = database.LookupContact(email);
     var after = DateTime.Now.TimeOfDay;
-
-    Console.WriteLine($"Got name: {name}");
     var span = after - before;
-    Console.WriteLine($"Query took {span.Seconds}s{span.Milliseconds}ms");
+    Console.WriteLine($"Query took {span.Seconds}s {span.Milliseconds}ms");
+
+    if (contact == null) 
+    {
+      throw new Exception("Contact not found");
+    }
   }
 }

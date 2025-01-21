@@ -19,12 +19,8 @@ public class Database : IDisposable
     GC.SuppressFinalize(this);
   }
 
-  public void InsertContacts(IEnumerable<Contact> contacts)
-  {
-    // TODO
-  }
 
-  public string LookupContact(string email)
+  public Contact? LookupContact(string email)
   {
     var command = _connection.CreateCommand();
     command.CommandText = "SELECT name FROM contacts WHERE email = $email";
@@ -34,9 +30,10 @@ public class Database : IDisposable
       var ok = reader.Read();
       if (!ok)
       {
-        throw new Exception($"Could not find contact with email '{email}'");
+        return null;
       }
-      return reader.GetString(0);
+      var name = reader.GetString(0);
+      return new Contact(name, email);
     }
 
   }
