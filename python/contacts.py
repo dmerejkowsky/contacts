@@ -24,14 +24,8 @@ class Contacts:
         self.connection = sqlite3.connect(db_path)
         self.connection.row_factory = sqlite3.Row
 
-    def insert_contacts(self, contacts):
-        print("Inserting contacts ...")
-        # TODO
-
-    def get_name_for_email(self, email):
-        print("Looking for email", email)
+    def find_contact_with_email(self, email):
         cursor = self.connection.cursor()
-        start = datetime.now()
         cursor.execute(
             """
             SELECT * FROM contacts
@@ -39,33 +33,39 @@ class Contacts:
             """,
             (email,),
         )
-        row = cursor.fetchone()
-        end = datetime.now()
+        import time
 
-        elapsed = end - start
-        print("query took", elapsed.microseconds / 1000, "ms")
-        if row:
-            name = row["name"]
-            print(f"Found name: '{name}'")
-            return name
-        else:
-            print("Not found")
+        time.sleep(2)
+        return cursor.fetchone()
 
 
-def yield_contacts(num_contacts):
-    # TODO: Generate a lot of contacts
-    # instead of just 3
-    yield ("name-1", "email-1@domain.tld")
-    yield ("name-2", "email-2@domain.tld")
-    yield ("name-3", "email-3@domain.tld")
+def insert_many_contacts(num_contacts):
+    print("Inserting {num_contacts} contacts ...")
+    # TODO - at the end of the call,
+    # the database should contain `num_contacts` contacts,
+    # from `email-1@domain.tod` to `email-{num_contacts}@domain.tld`,
+    # in this order
+    print("Done")
 
 
 def main():
+    if len(sys.argv) < 2:
+        sys.exit("Not enough arguments")
     num_contacts = int(sys.argv[1])
     db_path = Path("contacts.sqlite3")
+    insert_many_contacts(num_contacts)
+
+    last_mail = f"email-{num_contacts}@domain.tld"
     contacts = Contacts(db_path)
-    contacts.insert_contacts(yield_contacts(num_contacts))
-    charlie = contacts.get_name_for_email(f"email-{num_contacts}@domain.tld")
+    print("Looking for email", last_mail)
+
+    start = datetime.now()
+    result = contacts.find_contact_with_email(f"email-{num_contacts}@domain.tld")
+    end = datetime.now()
+    elapsed = end - start
+    print(f"find_contact_with_email took {elapsed.total_seconds() * 1000:.0f} ms")
+    if not result:
+        sys.exit(f"contact with email {last_mail} not found")
 
 
 if __name__ == "__main__":
