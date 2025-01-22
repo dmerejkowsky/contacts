@@ -15,12 +15,6 @@ public class Database {
         } catch (SQLException e) {
             throw new RuntimeException("Could not create connection: " + e);
         }
-        // You'll thank me later ;)
-        try {
-            connection.setAutoCommit(false);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public Connection getConnection() {
