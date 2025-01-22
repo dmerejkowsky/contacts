@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run" type="Application" factoryName="Application">
+  <configuration default="false" name="Run Application" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="info.dmerej.contacts.App" />
     <module name="contacts" />
     <option name="PROGRAM_PARAMETERS" value="10" />
